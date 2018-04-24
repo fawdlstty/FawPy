@@ -48,7 +48,7 @@ struct DisasmItem {
 			if (str.empty ())
 				break;
 			DisasmItem item (str);
-#define _(x) std::get<std::vector<DisasmItem>> ((x).rbegin ()->m_desp)
+#define _(x) std::get<std::vector<DisasmItem>> ((x).rbegin ()->m_val2)
 			if (level == 0)
 				v.push_back (item);
 			else if (level == 1)
