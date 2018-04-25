@@ -3,6 +3,7 @@
 #include <string>
 #include <variant>
 #include <vector>
+#include <stack>
 
 
 
@@ -80,21 +81,17 @@ struct DisasmItem {
 
 
 
+// 语句结构
+struct Obj_Stat;
+typedef std::variant<Obj_Stat, std::string, std::vector<std::variant<Obj_Stat, std::string>>, nullptr_t> Obj_Oper;
 struct Obj_Stat {
-	enum StatType {
-		None = 0,
-		Operation,
-		Item1,
-	}							m_type = None;
 	size_t						m_level;
-	std::vector<std::string>	m_voper;
-
-	void init () {
-		m_type = None;
-		m_voper.clear ();
-	}
+	Obj_Oper					m_oper1;
+	std::string					m_operator;
+	Obj_Oper					m_oper2;
 };
 
+// 函数结构
 struct Obj_Func {
 	size_t						m_level;
 	std::string					m_name;
@@ -102,6 +99,7 @@ struct Obj_Func {
 	std::vector<Obj_Stat>		m_vstat;
 };
 
+// 类结构
 struct Obj_Class {
 	size_t						m_level;
 	std::string					m_name;
@@ -109,6 +107,7 @@ struct Obj_Class {
 	std::vector<Obj_Func>		m_vfunc;
 };
 
+// 描述任意类型一行及一段
 typedef std::variant<Obj_Stat, Obj_Func, Obj_Class>		Obj_Item;
 typedef std::variant<std::vector<Obj_Item>, nullptr_t>	Obj_Items;
 
@@ -125,9 +124,7 @@ Obj_Items parse_code (std::vector<DisasmItem> &v) {
 	for (size_t i = 0; i < v.size (); ++i) {
 		if (v [i].m_cmd == "LOAD_BUILD_CLASS") {
 			// 类创建指令
-			if (stat.m_type != Obj_Stat::None) {
-				RETURN_ERROR ("正在处理其他操作时不可创建类");
-			} else if (v.size () <= i + 3) {
+			if (v.size () <= i + 3) {
 				RETURN_ERROR ("类创建指令后跟指令不可少于 3 个");
 			} else if (v [i + 1].m_cmd != "LOAD_CONST") {
 				RETURN_ERROR ("类创建指令后跟第 1 个指令不为 LOAD_CONST");
@@ -179,9 +176,7 @@ Obj_Items parse_code (std::vector<DisasmItem> &v) {
 			i += 3;
 		} else if (v [i].m_cmd == "LOAD_CONST" && v [i].m_val2.index () == 0) {
 			// 函数创建指令
-			if (stat.m_type != Obj_Stat::None) {
-				RETURN_ERROR ("正在处理其他操作时不可创建函数");
-			} else if (v.size () <= i + 3) {
+			if (v.size () <= i + 3) {
 				RETURN_ERROR ("函数创建指令后跟指令不可少于 3 个");
 			} else if (v [i + 1].m_cmd != "LOAD_CONST") {
 				RETURN_ERROR ("函数创建指令后跟第 1 个指令不为 LOAD_CONST");
