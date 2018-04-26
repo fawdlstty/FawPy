@@ -113,21 +113,24 @@ struct obj_value_t : public std::variant<obj_expr_t, std::string> {
 
 std::string obj_expr_t::to_str () {
 	std::string str;
-	if (m_operator == "call") {
-		if (m_vOper1.size () > 1) str += "(";
-		for (size_t i = 0; i < m_vOper1.size (); ++i) {
-			if (i > 0) str += ", ";
-			str += m_vOper1[i].to_str ();
-		}
-		if (m_vOper1.size () > 1) str += ")";
-		str += " (";
-		for (size_t i = 0; i < m_vOper2.size (); ++i) {
-			if (i > 0) str += ", ";
-			str += m_vOper2[i].to_str ();
-		}
-		str += ");";
-		return str;
+	if (m_vOper1.size () > 1) str += "(";
+	for (size_t i = 0; i < m_vOper1.size (); ++i) {
+		if (i > 0) str += ", ";
+		str += m_vOper1[i].to_str ();
 	}
+	if (m_vOper1.size () > 1) str += ")";
+	//
+	if (m_operator == "+" || m_operator == "-" || m_operator == "*" || m_operator == "/" || m_operator == "==") {
+		str += m_operator;
+	}
+	//
+	str += " (";
+	for (size_t i = 0; i < m_vOper2.size (); ++i) {
+		if (i > 0) str += ", ";
+		str += m_vOper2[i].to_str ();
+	}
+	str += ");";
+	return str;
 }
 
 struct obj_if_t;
@@ -165,7 +168,16 @@ struct obj_stat_t : public std::variant<obj_expr_t, obj_if_t, obj_for_t, obj_whi
 	obj_stat_t (obj_for_t o)	: std::variant<obj_expr_t, obj_if_t, obj_for_t, obj_while_t> (o) {}
 	obj_stat_t (obj_while_t o)	: std::variant<obj_expr_t, obj_if_t, obj_for_t, obj_while_t> (o) {}
 	std::string to_str (size_t padding) {
-
+		//obj_stat_t &stat = std::get<0> (item);
+		//if (stat.index () == 0) {
+		//	obj_expr_t &_expr = std::get<0> (stat);
+		//} else if (stat.index () == 1) {
+		//	obj_if_t &_if = std::get<1> (stat);
+		//} else if (stat.index () == 2) {
+		//	obj_for_t &_for = std::get<2> (stat);
+		//} else if (stat.index () == 3) {
+		//	obj_while_t &_while = std::get<3> (stat);
+		//}
 	}
 };
 
@@ -175,6 +187,9 @@ struct obj_func_t {
 	std::string					m_name;
 	std::vector<std::string>	m_vParam;
 	std::vector<obj_stat_t>		m_vStat;
+	std::string to_str (size_t padding) {
+
+	}
 };
 
 // 类结构    m_level  m_name  m_vStat  m_vFunc
@@ -183,6 +198,14 @@ struct obj_class_t {
 	std::string					m_name;
 	std::vector<obj_stat_t>		m_vStat;
 	std::vector<obj_func_t>		m_vFunc;
+	std::string to_str (size_t padding) {
+		//obj_class_t &cls = std::get<2> (item);
+		//std::cout << padding (cls.m_level) << "class " << cls.m_name << '{' << std::endl;
+		//for (obj_stat_t &stat : cls.m_vStat) {
+		//	std::cout << stat.to_str (cls.m_level) << std::endl;
+		//}
+		//std::cout << padding (cls.m_level) << "};" << std::endl;
+	}
 };
 
 // 描述任意类型一行 obj_expr_t
@@ -191,10 +214,32 @@ struct obj_item_t : public std::variant<obj_stat_t, obj_func_t, obj_class_t, nul
 	obj_item_t (obj_func_t o)	: std::variant<obj_stat_t, obj_func_t, obj_class_t, nullptr_t> (o) {}
 	obj_item_t (obj_class_t o)	: std::variant<obj_stat_t, obj_func_t, obj_class_t, nullptr_t> (o) {}
 	obj_item_t (nullptr_t o)	: std::variant<obj_stat_t, obj_func_t, obj_class_t, nullptr_t> (o) {}
+	std::string to_str (size_t padding) {
+		if (index () == 0) {
+			return std::get<0> (*this).to_str (padding);
+		} else if (index () == 1) {
+			return std::get<1> (*this).to_str (padding);
+		} else if (index () == 2) {
+			return std::get<2> (*this).to_str (padding);
+		}
+	}
 };
 
 // 描述任意类型一段
-typedef std::variant<std::vector<obj_item_t>, nullptr_t>				obj_items_t;
+struct obj_items_t : public std::variant<std::vector<obj_item_t>, nullptr_t> {
+	obj_items_t (std::vector<obj_item_t> o)	: std::variant<std::vector<obj_item_t>, nullptr_t> (o) {}
+	obj_items_t (nullptr_t o)				: std::variant<std::vector<obj_item_t>, nullptr_t> (o) {}
+	std::string to_str (size_t padding) {
+		if (index () == 1) {
+			return "parse error";
+		}
+		std::vector<obj_item_t> &m_v = std::get<0> (*this);
+		std::string str;
+		for (obj_item_t &item : m_v) {
+			str += item.to_str (padding);
+		}
+	}
+};
 #pragma endregion
 
 
@@ -362,30 +407,7 @@ struct BitConverter {
 	// 打印翻译后的代码
 	void print_code () {
 		auto padding = [](size_t padding) { std::string s = ""; while (padding-- > 0) s += "    "; return s; };
-		std::vector<obj_item_t> &m_v = std::get<0> (m_items);
-		for (obj_item_t &item : m_v) {
-			if (item.index () == 0) {
-				obj_stat_t &stat = std::get<0> (item);
-				if (stat.index () == 0) {
-					obj_expr_t &_expr = std::get<0> (stat);
-				} else if (stat.index () == 1) {
-					obj_if_t &_if = std::get<1> (stat);
-				} else if (stat.index () == 2) {
-					obj_for_t &_for = std::get<2> (stat);
-				} else if (stat.index () == 3) {
-					obj_while_t &_while = std::get<3> (stat);
-				}
-			} else if (item.index () == 1) {
-				obj_func_t &func = std::get<1> (item);
-			} else if (item.index () == 2) {
-				obj_class_t &cls = std::get<2> (item);
-				std::cout << padding (cls.m_level) << "class " << cls.m_name << '{' << std::endl;
-				for (obj_stat_t &stat : cls.m_vStat) {
-					//std::cout << padding (cls.m_level + 1) << 
-				}
-				std::cout << padding (cls.m_level) << "};" << std::endl;
-			}
-		}
+		std::cout << m_items.to_str () << std::endl;
 	}
 };
 
