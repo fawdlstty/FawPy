@@ -128,34 +128,13 @@ struct obj_value_t : public std::variant<obj_expr_t, std::string, int, nullptr_t
 
 std::string obj_expr_t::to_str (std::string str_self) {
 	std::string s;
-	if (m_operator == "call" && m_vOper1.size () == 1 && m_vOper1[0].index.index == 1 && std::get<1> (m_vOper1[0]) == "print") {
+	if (m_operator == "call" && m_vOper1.size () == 1 && m_vOper1[0].index () == 1 && std::get<1> (m_vOper1[0]) == "print") {
 		s += "std::cout << ";
-		//
-		//
-		//
-		//
-		//
-		//
-		//
-		//
-		//
-		//
-		//
-		//
-		//
-		//
-		//
-		//
-		//
-		//
-		//
-		//
-		//
-		//
-		//
-		//
-		//
-		s += " << std::endl;";
+		for (obj_value_t &val : m_vOper2) {
+			s += val.to_str (str_self);
+			s += " << ";
+		}
+		s += "std::endl";
 		return s;
 	}
 	if (m_vOper1.size () > 1) s += "(";
@@ -348,13 +327,11 @@ struct obj_items_t : public std::variant<std::vector<obj_item_t>, nullptr_t> {
 	obj_items_t (std::vector<obj_item_t> o)	: std::variant<std::vector<obj_item_t>, nullptr_t> (o) {}
 	obj_items_t (nullptr_t o)				: std::variant<std::vector<obj_item_t>, nullptr_t> (o) {}
 	std::string to_str (size_t padding) {
-		if (index () == 1) {
+		if (index () == 1)
 			return "parse error";
-		}
 		std::string s;
-		for (obj_item_t &item : std::get<0> (*this)) {
+		for (obj_item_t &item : std::get<0> (*this))
 			s += item.to_str (padding);
-		}
 		return s;
 	}
 };
@@ -592,7 +569,7 @@ struct BitConverter {
 
 int main (int argc, char* argv[]) {
 	// ¶ÁÈ¡ÎÄ¼þ
-	std::ifstream ifs ("D:/Downloads/FawPy-master/disasm2.txt");
+	std::ifstream ifs ("D:/GitHub/FawPy/disasm1.txt");
 	std::string s ((std::istreambuf_iterator<char> (ifs)), std::istreambuf_iterator<char> ());
 	std::vector<DisasmItem> v = DisasmItem::parse (s);
 
