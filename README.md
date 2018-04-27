@@ -7,25 +7,25 @@ Python最被大众诟病的主要因素就是速度慢，毕竟虚拟机解释�
 
 ```python
 def fun_a ():
-	return 'hello world'
+    return 'hello world'
 
 def fun_b (b):
-	return b + 1
+    return b + 1
 
 def fun_c (a, b):
-	return a*2-b/3
+    return a*2-b/3
 
 class cls_a ():
-	def fun_cls_d (self):
-		return self
+    def fun_cls_d (self):
+        return self
 
 if (__name__ == '__main__'):
-	a = fun_a ()
-	print (a)
-	b = fun_b (2)
-	print (b)
-	c = fun_c (4, 5)
-	print (c)
+    a = fun_a ()
+    print (a)
+    b = fun_b (2)
+    print (b)
+    c = fun_c (4, 5)
+    print (c)
 ```
 
 代码首先通过cpl.py转为字节码反汇编形式（disasm.txt）：
