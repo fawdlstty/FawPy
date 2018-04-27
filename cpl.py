@@ -34,9 +34,7 @@ def _get_instructions_bytes(code, _file, _line_offset=0):
 		if arg is not None:
 			disasm_line += repr (arg).ljust (6)
 			if argrepr:
-				if (repr (type (argval))[8:-2] == 'code'):
-				else:
-					disasm_line += argrepr
+				disasm_line += argrepr
 		print (disasm_line, file=_file)
 		if (repr (type (argval))[8:-2] == 'code'):
 			_get_instructions_bytes (argval, _file, _line_offset + 4)

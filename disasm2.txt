@@ -1,0 +1,46 @@
+0     LOAD_BUILD_CLASS     
+2     LOAD_CONST           0     <code object cls_a at 0x00000165F7F1EF60, file "", line 1>
+    0     LOAD_NAME            0     __name__
+    2     STORE_NAME           1     __module__
+    4     LOAD_CONST           0     'cls_a'
+    6     STORE_NAME           2     __qualname__
+    8     LOAD_CONST           1     <code object fun_cls_d at 0x00000165F7F0AE40, file "", line 2>
+        0     LOAD_FAST            0     self
+        2     RETURN_VALUE         
+    10    LOAD_CONST           2     'cls_a.fun_cls_d'
+    12    MAKE_FUNCTION        0     
+    14    STORE_NAME           3     fun_cls_d
+    16    LOAD_CONST           3     None
+    18    RETURN_VALUE         
+4     LOAD_CONST           1     'cls_a'
+6     MAKE_FUNCTION        0     
+8     LOAD_CONST           1     'cls_a'
+10    CALL_FUNCTION        2     
+12    STORE_NAME           0     cls_a
+14    LOAD_NAME            1     __name__
+16    LOAD_CONST           2     '__main__'
+18    COMPARE_OP           2     ==
+20    POP_JUMP_IF_FALSE    64    
+22    LOAD_NAME            0     cls_a
+24    CALL_FUNCTION        0     
+26    STORE_NAME           2     a
+28    LOAD_NAME            2     a
+30    LOAD_ATTR            3     fun_cls_d
+32    CALL_FUNCTION        0     
+34    STORE_NAME           2     a
+36    SETUP_LOOP           26    to 64
+38    LOAD_NAME            4     range
+40    LOAD_CONST           3     0
+42    LOAD_CONST           4     10
+44    CALL_FUNCTION        2     
+46    GET_ITER             
+48    FOR_ITER             12    to 62
+50    STORE_NAME           5     i
+52    LOAD_NAME            6     print
+54    LOAD_NAME            5     i
+56    CALL_FUNCTION        1     
+58    POP_TOP              
+60    JUMP_ABSOLUTE        48    
+62    POP_BLOCK            
+64    LOAD_CONST           5     None
+66    RETURN_VALUE         
