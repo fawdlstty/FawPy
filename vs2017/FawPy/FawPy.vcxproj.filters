@@ -13,6 +13,9 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="头文件\grammar">
+      <UniqueIdentifier>{dd87dcb0-0315-4161-b6aa-48698a8d4ded}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -22,6 +25,27 @@
   <ItemGroup>
     <ClInclude Include="hstring.hpp">
       <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="grammar\DisasmItem.hpp">
+      <Filter>头文件\grammar</Filter>
+    </ClInclude>
+    <ClInclude Include="grammar\gm_expr.hpp">
+      <Filter>头文件\grammar</Filter>
+    </ClInclude>
+    <ClInclude Include="grammar\gm_block.hpp">
+      <Filter>头文件\grammar</Filter>
+    </ClInclude>
+    <ClInclude Include="grammar\gm_struct.hpp">
+      <Filter>头文件\grammar</Filter>
+    </ClInclude>
+    <ClInclude Include="grammar\gm_item.hpp">
+      <Filter>头文件\grammar</Filter>
+    </ClInclude>
+    <ClInclude Include="grammar\Disasmer.hpp">
+      <Filter>头文件\grammar</Filter>
+    </ClInclude>
+    <ClInclude Include="grammar\ParseTypes.hpp">
+      <Filter>头文件\grammar</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

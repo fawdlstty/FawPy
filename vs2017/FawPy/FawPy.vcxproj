@@ -85,6 +85,7 @@
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -110,6 +111,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
@@ -120,6 +122,13 @@
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="grammar\Disasmer.hpp" />
+    <ClInclude Include="grammar\DisasmItem.hpp" />
+    <ClInclude Include="grammar\gm_item.hpp" />
+    <ClInclude Include="grammar\gm_block.hpp" />
+    <ClInclude Include="grammar\gm_expr.hpp" />
+    <ClInclude Include="grammar\gm_struct.hpp" />
+    <ClInclude Include="grammar\ParseTypes.hpp" />
     <ClInclude Include="hstring.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
