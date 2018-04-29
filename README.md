@@ -126,23 +126,23 @@ auto fun_c (int a, int b) {
     return ((a*2)-(b/3));
 }
 
-class cls_a {
+struct cls_a {
     auto fun_cls_d () {
         return this;
     }
 };
 
 int main (int argc, char* argv[]) {
-    a = fun_a ();
+    auto a = fun_a ();
     std::cout << a << std::endl;
-    b = fun_b (2);
+    auto b = fun_b (2);
     std::cout << b << std::endl;
-    c = fun_c (4, 5);
+    auto c = fun_c (4, 5);
     std::cout << c << std::endl;
 }
 ```
 
-目前这个项目是测试版，翻译的不够完美，声明变量这儿都还没有定义变量类型，能翻译的结构有限，问题也较多，也有明确的弱点，比如迭代器，截止C艹17还没有这玩意，所以从实现上就比较蛋疼了；另外还有模块的`__name=='__main__'`，etc...
+经测试，生成的代码编译成功。目前这个项目是测试版，翻译的不够完美，能翻译的结构有限，问题也较多，也有明确的弱点，比如迭代器，截止C艹17还没有这玩意，所以从实现上就比较蛋疼了；另外还有模块的`__name=='__main__'`，etc...
 
 各位大佬如果有什么好的建议及遇到什么问题欢迎提issue。
 

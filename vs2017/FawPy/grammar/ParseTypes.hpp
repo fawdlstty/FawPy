@@ -32,6 +32,8 @@ struct ParseTypes : public std::vector<ParseType> {
 
 	// 添加一个变量名
 	void add_type (ParseType::ParseTypeEnum type, std::string typeName, std::string typeName2) {
+		if (typeName.empty ())
+			return;
 		auto iter = begin ();
 		for (; iter != end () && iter->m_type <= type; ++iter);
 		insert (iter, { type, typeName, typeName2 });
@@ -58,6 +60,11 @@ struct ParseTypes : public std::vector<ParseType> {
 				return iter;
 		}
 		return end ();
+	}
+
+	// 清空变量
+	void clear_var () {
+		m_vars.clear ();
 	}
 };
 
