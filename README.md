@@ -28,7 +28,13 @@ if (__name__ == '__main__'):
     print (c)
 ```
 
-代码首先通过cpl.py转为字节码反汇编形式（disasm.txt）：
+代码首先通过cpl.py转为字节码反汇编形式（disasm.txt），命令为：
+
+```batch
+python cpl.py test1.py
+```
+
+生成的字节码反汇编代码（生成的文件名均为disasm.txt，为了辨识这里改名为disasm1.txt）为：
 
 ```assembly
 0     LOAD_CONST           0     <code object fun_a at 0x000002514DE1AE40, file "", line 1>
@@ -108,7 +114,9 @@ if (__name__ == '__main__'):
 96    RETURN_VALUE         
 ```
 
-Python字节码几乎与源码是一一对应的，所以翻译起来比较方便。接下来项目代码主要读入字节码反汇编文件，也就是disasm1.txt，将字节码转为C++源码。转换后的效果如下所示：
+Python字节码几乎与源码是一一对应的，所以翻译起来比较方便。接下来项目代码主要读入字节码反汇编文件，也就是disasm1.txt，将字节码转为C++源码。转换方式为打开vs2017项目，修改main.cpp里面的字节码文件路径，指向待翻译字节码。
+
+转换后的效果如下所示：
 
 ```cpp
 #include <iostream>
