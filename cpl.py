@@ -46,7 +46,7 @@ if (__name__ == '__main__'):
 	if not src or src[-1] != '\n':
 		src += '\n'
 	code = compile(src, '', 'exec')
-	f = open ('disasm.txt', 'w')
+	f = open (sys.argv[2], 'w')
 	_get_instructions_bytes (code, f)
 	f.close ()
 

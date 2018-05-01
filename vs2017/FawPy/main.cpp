@@ -3,14 +3,7 @@
 #include <string>
 #include <variant>
 #include <vector>
-#include "hstring.hpp"
-#include "grammar/DisasmItem.hpp"
-#include "grammar/ParseTypes.hpp"
-#include "grammar/gm_expr.hpp"
-#include "grammar/gm_struct.hpp"
-#include "grammar/gm_block.hpp"
-#include "grammar/gm_item.hpp"
-#include "grammar/Disasmer.hpp"
+#include "grammar/fawpy.hpp"
 
 
 
@@ -29,7 +22,8 @@ int main (int argc, char* argv[]) {
 		v.erase (v.end () - 2, v.end ());
 		Disasmer parser;
 		parser.parse_items (v);
-		parser.print_code ();
+		s = parser.translate_code ();
+		std::cout << s << std::endl;
 	}
 	system ("pause");
 	return 0;

@@ -23,9 +23,6 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="hstring.hpp">
-      <Filter>头文件</Filter>
-    </ClInclude>
     <ClInclude Include="grammar\DisasmItem.hpp">
       <Filter>头文件\grammar</Filter>
     </ClInclude>
@@ -45,6 +42,12 @@
       <Filter>头文件\grammar</Filter>
     </ClInclude>
     <ClInclude Include="grammar\ParseTypes.hpp">
+      <Filter>头文件\grammar</Filter>
+    </ClInclude>
+    <ClInclude Include="grammar\fawpy.hpp">
+      <Filter>头文件\grammar</Filter>
+    </ClInclude>
+    <ClInclude Include="grammar\hstring.hpp">
       <Filter>头文件\grammar</Filter>
     </ClInclude>
   </ItemGroup>
