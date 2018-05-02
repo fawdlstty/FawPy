@@ -147,8 +147,6 @@ public:
 			for (char ch : str) {
 				if (isalnum (ch) || ch == '-' || ch == '_' || ch == '.' || ch == '~')
 					str_ret += ch;
-				else if (ch == ' ')
-					str_ret += '+';
 				else {
 					str_ret += '%';
 					str_ret += _to_hex (((unsigned char)ch >> 4) & 0xf);

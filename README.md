@@ -1,7 +1,10 @@
 # FawPy
 
-将Python源码翻译为C++源码的项目
+将Python源码翻译为C艹源码的项目
 Python最被大众诟病的主要因素就是速度慢，毕竟虚拟机解释执行，这就从根本上限制了Python无法开发超大型架构的项目，因为项目源码越多，项目就越慢。所以我在此发起这个项目，用于将Python翻译为C艹，给Python提速，使Python也可以自由自在的开发超大型项目而不用考虑速度因素。
+原始调用方式比较麻烦，在此简化为web端在线翻译。链接如下：
+
+<a href="http://111.230.39.240:4545/tools/fawpy" target="_blank">http://111.230.39.240:4545/tools/fawpy</a>
 
 示例Python代码如下（test1.py）：
 
@@ -27,94 +30,6 @@ if (__name__ == '__main__'):
     c = fun_c (4, 5)
     print (c)
 ```
-
-代码首先通过cpl.py转为字节码反汇编形式（disasm.txt），命令为：
-
-```batch
-python cpl.py test1.py
-```
-
-生成的字节码反汇编代码（生成的文件名均为disasm.txt，为了辨识这里改名为disasm1.txt）为：
-
-```assembly
-0     LOAD_CONST           0     <code object fun_a at 0x000002514DE1AE40, file "", line 1>
-    0     LOAD_CONST           1     'hello world'
-    2     RETURN_VALUE         
-2     LOAD_CONST           1     'fun_a'
-4     MAKE_FUNCTION        0     
-6     STORE_NAME           0     fun_a
-8     LOAD_CONST           2     <code object fun_b at 0x000002514DE2EF60, file "", line 4>
-    0     LOAD_FAST            0     b
-    2     LOAD_CONST           1     1
-    4     BINARY_ADD           
-    6     RETURN_VALUE         
-10    LOAD_CONST           3     'fun_b'
-12    MAKE_FUNCTION        0     
-14    STORE_NAME           1     fun_b
-16    LOAD_CONST           4     <code object fun_c at 0x000002514DE530C0, file "", line 7>
-    0     LOAD_FAST            0     a
-    2     LOAD_CONST           1     2
-    4     BINARY_MULTIPLY      
-    6     LOAD_FAST            1     b
-    8     LOAD_CONST           2     3
-    10    BINARY_TRUE_DIVIDE   
-    12    BINARY_SUBTRACT      
-    14    RETURN_VALUE         
-18    LOAD_CONST           5     'fun_c'
-20    MAKE_FUNCTION        0     
-22    STORE_NAME           2     fun_c
-24    LOAD_BUILD_CLASS     
-26    LOAD_CONST           6     <code object cls_a at 0x000002514DE53540, file "", line 10>
-    0     LOAD_NAME            0     __name__
-    2     STORE_NAME           1     __module__
-    4     LOAD_CONST           0     'cls_a'
-    6     STORE_NAME           2     __qualname__
-    8     LOAD_CONST           1     <code object fun_cls_d at 0x000002514DE535D0, file "", line 11>
-        0     LOAD_FAST            0     self
-        2     RETURN_VALUE         
-    10    LOAD_CONST           2     'cls_a.fun_cls_d'
-    12    MAKE_FUNCTION        0     
-    14    STORE_NAME           3     fun_cls_d
-    16    LOAD_CONST           3     None
-    18    RETURN_VALUE         
-28    LOAD_CONST           7     'cls_a'
-30    MAKE_FUNCTION        0     
-32    LOAD_CONST           7     'cls_a'
-34    CALL_FUNCTION        2     
-36    STORE_NAME           3     cls_a
-38    LOAD_NAME            4     __name__
-40    LOAD_CONST           8     '__main__'
-42    COMPARE_OP           2     ==
-44    POP_JUMP_IF_FALSE    94    
-46    LOAD_NAME            0     fun_a
-48    CALL_FUNCTION        0     
-50    STORE_NAME           5     a
-52    LOAD_NAME            6     print
-54    LOAD_NAME            5     a
-56    CALL_FUNCTION        1     
-58    POP_TOP              
-60    LOAD_NAME            1     fun_b
-62    LOAD_CONST           9     2
-64    CALL_FUNCTION        1     
-66    STORE_NAME           7     b
-68    LOAD_NAME            6     print
-70    LOAD_NAME            7     b
-72    CALL_FUNCTION        1     
-74    POP_TOP              
-76    LOAD_NAME            2     fun_c
-78    LOAD_CONST           10    4
-80    LOAD_CONST           11    5
-82    CALL_FUNCTION        2     
-84    STORE_NAME           8     c
-86    LOAD_NAME            6     print
-88    LOAD_NAME            8     c
-90    CALL_FUNCTION        1     
-92    POP_TOP              
-94    LOAD_CONST           12    None
-96    RETURN_VALUE         
-```
-
-Python字节码几乎与源码是一一对应的，所以翻译起来比较方便。接下来项目代码主要读入字节码反汇编文件，也就是disasm1.txt，将字节码转为C++源码。转换方式为打开vs2017项目，修改main.cpp里面的字节码文件路径，指向待翻译字节码。
 
 转换后的效果如下所示：
 
@@ -150,8 +65,10 @@ int main (int argc, char* argv[]) {
 }
 ```
 
-经测试，生成的代码编译成功。目前这个项目是测试版，翻译的不够完美，能翻译的结构有限，问题也较多，也有明确的弱点，比如迭代器，截止C艹17还没有这玩意，所以从实现上就比较蛋疼了；另外还有模块的`__name=='__main__'`，etc...
+项目引用了cinatra项目，链接为<a href="https://github.com/qicosmos/cinatra" target="_blank">https://github.com/qicosmos/cinatra</a>
 
-各位大佬如果有什么好的建议及遇到什么问题欢迎提issue。
+经测试，生成的代码编译成功。目前这个项目是测试版，翻译的不够完美，能翻译的结构有限，问题也较多，也有明确的弱点，比如生成器，截止C艹17还没有这玩意，所以从实现上就比较蛋疼了；另外还有模块的`__name=='__main__'`，etc...
 
+各位大佬如果有什么好的建议及遇到什么问题欢迎提issue，同时也欢迎对这个项目感兴趣的大佬参与进来一起开发。
 
+个人博客地址：<a href="https://www.fawdlstty.com" target="_blank">https://www.fawdlstty.com</a>，欢迎到访。
