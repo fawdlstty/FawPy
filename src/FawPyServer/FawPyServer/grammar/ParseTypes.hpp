@@ -11,55 +11,59 @@
 
 
 struct ParseType {
-	enum ParseTypeEnum {
-		ParseTypeNone				= 0,
-		ParseTypeGlobal				= 1,
-		ParseTypeFunction			= 2,
-		ParseTypeClass				= 3,
-		ParseTypeClassAttr			= 4,
-		ParseTypeClassMethod		= 5,
-		//ParseTypeLocalVariable	= 6,
+	enum VarRegionEnum {
+		VarRegionNone			= 0,
+		VarRegionGlobal			= 0,
+		VarRegionClass			= 1,
+		VarRegionInFunction		= 2,
+	};
+	enum VarTypeEnum {
+		VarTypeNone				= 0,
+		VarTypeFunction			= 1,
+		VarTypeClass			= 2,
+		VarTypeClassAttr		= 3,
+		VarTypeClassMethod		= 4,
+		VarTypePredefine		= 5,
+		VarTypeUserDefine		= 6,
+		VarTypeAny				= 7,
 	};
 
-	ParseTypeEnum	m_type;
-	std::string		m_strName;
-	std::string		m_strName2;
-	ParseType (ParseTypeEnum type, std::string strName, std::string strName2) : m_type (type), m_strName (strName), m_strName2 (strName2) {}
+	VarTypeEnum		m_type;
+	std::string		m_type_name;
+	ParseType (VarTypeEnum type, std::string type_name) : m_type (type), m_type_name (type_name) {}
 };
 
 struct ParseTypes : public std::vector<ParseType> {
-	std::vector<std::tuple<std::vector<ParseType>::iterator, std::string>> m_vars;
+	std::vector<std::tuple<ParseType::VarRegionEnum, std::vector<ParseType>::iterator, std::string>> m_vars;
 
-	// 添加一个变量名
-	void add_type (ParseType::ParseTypeEnum type, std::string typeName, std::string typeName2) {
-		if (typeName.empty ())
+	// 添加一个类型
+	void add_type (ParseType::VarTypeEnum type, std::string type_name) {
+		if (type_name.empty ())
 			return;
-		auto iter = begin ();
-		for (; iter != end () && iter->m_type <= type; ++iter);
-		insert (iter, { type, typeName, typeName2 });
+		push_back (ParseType (type, type_name));
 	}
 
-	// 获取类型
-	ParseType::ParseTypeEnum get_type (std::string strName, std::string strName2) {
-		for (ParseType &pt : *this) {
-			if (strName == pt.m_strName && strName2 == pt.m_strName2)
-				return pt.m_type;
+	// 添加一个变量
+	void add_var (ParseType::VarRegionEnum region, ParseType::VarTypeEnum type, std::string type_name, std::string var_name) {
+		std::vector<ParseType>::iterator iter = begin ();
+		for (; iter != end (); ++iter) {
+			if (iter->m_type == type && iter->m_type_name == type_name)
+				break;
 		}
-		return ParseType::ParseTypeNone;
-	}
-
-	// 添加一个新变量
-	void add_var (std::vector<ParseType>::iterator iter, std::string varName) {
-		m_vars.push_back (std::make_tuple (iter, varName));
-	}
-
-	// 获取变量类型
-	std::vector<ParseType>::iterator get_var (std::string varName) {
-		for (auto[iter, name] : m_vars) {
-			if (name == varName)
-				return iter;
+		if (iter == end ()) {
+			push_back (ParseType (type, type_name));
+			iter = end () - 1;
 		}
-		return end ();
+		m_vars.push_back (std::make_tuple (region, iter, var_name));
+	}
+
+	// 获取一个变量
+	std::tuple<ParseType::VarRegionEnum, ParseType::VarTypeEnum, std::string> get_var (std::string var_name) {
+		for (auto[region, iter, _var_name] : m_vars) {
+			if (_var_name == var_name)
+				return std::make_tuple (region, iter->m_type, iter->m_type_name);
+		}
+		return std::make_tuple (ParseType::VarRegionNone, ParseType::VarTypeNone, "");
 	}
 
 	// 清空变量

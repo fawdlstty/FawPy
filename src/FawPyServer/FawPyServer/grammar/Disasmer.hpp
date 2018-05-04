@@ -16,7 +16,7 @@ struct Disasmer {
 
 	// 反编译一段代码
 	size_t parse_item (std::vector<DisasmItem> &v, size_t index) {
-#define RETURN_ERROR(x) { std::cout << "line " << i << ": " << (x) << std::endl; return 0; }
+#define RETURN_ERROR(x) { std::cout << "pos " << v[i].m_offset << ": " << (x) << std::endl; return 0; }
 		std::vector<obj_item_t> &m_v = std::get<0> (m_items);
 		obj_expr_t _expr;
 		// 由于可能一段代码分散于多行，所以产生一个遍历，直到读到第一段完整代码时跳出
@@ -25,7 +25,7 @@ struct Disasmer {
 			if (v[i].m_cmd == "LOAD_BUILD_CLASS") {
 				// 类创建指令
 				if (_expr.m_vOper1.size () || _expr.m_vOper2.size ())	{ RETURN_ERROR ("类创建时数据栈不可有待处理数据"); }
-				else if (v.size () <= i + 6)							{ RETURN_ERROR ("类创建指令后跟指令不可少于 3 个"); }
+				else if (v.size () <= i + 6)							{ RETURN_ERROR ("类创建指令后跟指令不可少于 6 个"); }
 				else if (v[i + 1].m_cmd != "LOAD_CONST")				{ RETURN_ERROR ("类创建指令后跟第 1 个指令不为 LOAD_CONST"); }
 				else if (v[i + 1].m_val2.index () != 0)					{ RETURN_ERROR ("类创建指令后跟第 1 个指令不为 LOAD_CONST 代码对象"); }
 				else if (v[i + 2].m_cmd != "LOAD_CONST")				{ RETURN_ERROR ("类创建指令后跟第 2 个指令不为 LOAD_CONST"); }
@@ -58,7 +58,8 @@ struct Disasmer {
 				}
 				m_v.push_back (cls);
 				return 7;
-			} else if (v[i].m_cmd == "LOAD_CONST" && v[i].m_val2.index () == 0) {
+			}
+			else if (v[i].m_cmd == "LOAD_CONST" && v[i].m_val2.index () == 0) {
 				// 函数创建指令
 				if (_expr.m_vOper1.size () || _expr.m_vOper2.size ())	{ RETURN_ERROR ("函数创建时数据栈不可有待处理数据"); }
 				else if (v.size () <= i + 3)							{ RETURN_ERROR ("函数创建指令后跟指令不可少于 3 个"); }
@@ -91,14 +92,18 @@ struct Disasmer {
 				}
 				m_v.push_back (func);
 				return 4;
-			} else if (v[i].m_cmd == "LOAD_CONST" || v[i].m_cmd == "LOAD_FAST" || v[i].m_cmd == "LOAD_NAME") {
+			}
+			else if (v[i].m_cmd == "LOAD_CONST" || v[i].m_cmd == "LOAD_FAST" || v[i].m_cmd == "LOAD_NAME") {
+				// 加载常量、参数或变量
 				if (v[i].m_val2.index () == 1)
 					_expr.m_vOper2.push_back (std::get<1> (v[i].m_val2));
 				else if (v[i].m_val2.index () == 2)
 					_expr.m_vOper2.push_back (std::get<2> (v[i].m_val2));
 				else if (v[i].m_val2.index () == 3)
 					_expr.m_vOper2.push_back (std::get<3> (v[i].m_val2));
-			} else if (v[i].m_cmd == "RETURN_VALUE") {
+			}
+			else if (v[i].m_cmd == "RETURN_VALUE") {
+				// 返回结果
 				if (_expr.m_vOper2.size () == 0) { RETURN_ERROR ("数据栈中没有数据，无法执行 RETURN_VALUE"); }
 				_expr.m_operator = "return";
 				obj_stat_t tmp_stat;
@@ -107,7 +112,9 @@ struct Disasmer {
 				tmp_item = tmp_stat;
 				m_v.push_back (tmp_item);
 				return i - index + 1;
-			} else if (v[i].m_cmd == "BINARY_ADD" || v[i].m_cmd == "BINARY_SUBTRACT" || v[i].m_cmd == "BINARY_MULTIPLY" || v[i].m_cmd == "BINARY_TRUE_DIVIDE" || v[i].m_cmd == "COMPARE_OP") {
+			}
+			else if (v[i].m_cmd == "BINARY_ADD" || v[i].m_cmd == "BINARY_SUBTRACT" || v[i].m_cmd == "BINARY_MULTIPLY" || v[i].m_cmd == "BINARY_TRUE_DIVIDE" || v[i].m_cmd == "COMPARE_OP") {
+				// 算数运算指令
 				if (_expr.m_vOper2.size () < 2) { RETURN_ERROR ("数据栈中数据少于两条，无法执行算数运算"); }
 				obj_expr_t _expr2;
 				_expr2.m_vOper2.push_back (*_expr.m_vOper2.rbegin ());
@@ -120,58 +127,127 @@ struct Disasmer {
 				_expr2.m_vOper1.push_back (*_expr.m_vOper2.rbegin ());
 				_expr.m_vOper2.pop_back ();
 				_expr.m_vOper2.push_back (_expr2);
-			} else if (v[i].m_cmd == "LOAD_ATTR") {
+			}
+			else if (v[i].m_cmd == "LOAD_ATTR") {
+				// 加载成员指令
 				if (_expr.m_vOper2.size () < 1) { RETURN_ERROR ("数据栈中数据少于一条，无法执行 CALL_FUNCTION"); }
 				_expr.m_vOper1.push_back (*_expr.m_vOper2.begin ());
 				_expr.m_vOper2.erase (_expr.m_vOper2.begin ());
 				_expr.m_vOper2.push_back (std::get<1> (v[i].m_val2));
 				_expr.m_operator = "->";
 				obj_expr_t _expr2;
-				_expr2.xchg (_expr);
+				_expr2.swap (_expr);
 				_expr.m_vOper2.push_back (_expr2);
-			} else if (v[i].m_cmd == "CALL_FUNCTION") {
+			}
+			else if (v[i].m_cmd == "CALL_FUNCTION") {
+				// 调用函数指令
 				if (_expr.m_vOper2.size () < 1) { RETURN_ERROR ("数据栈中数据少于一条，无法执行 CALL_FUNCTION"); }
 				_expr.m_vOper1.push_back (*_expr.m_vOper2.begin ());
 				_expr.m_vOper2.erase (_expr.m_vOper2.begin ());
 				_expr.m_operator = "call";
 				obj_expr_t _expr2;
-				_expr2.xchg (_expr);
+				_expr2.swap (_expr);
 				_expr.m_vOper2.push_back (_expr2);
-			} else if (v[i].m_cmd == "STORE_NAME") {
+			}
+			else if (v[i].m_cmd == "STORE_NAME") {
+				// 存储变量指令
 				_expr.m_vOper1.push_back (std::get<1> (v[i].m_val2));
 				_expr.m_operator = "=";
 				m_v.push_back (obj_stat_t (_expr));
 				return i - index + 1;
-			} else if (v[i].m_cmd == "POP_TOP") {
+			}
+			else if (v[i].m_cmd == "POP_TOP") {
+				// 舍弃栈顶元素指令
 				m_v.push_back (obj_stat_t (_expr));
 				return i - index + 1;
-			} else if (v[i].m_cmd == "POP_JUMP_IF_TRUE" || v[i].m_cmd == "POP_JUMP_IF_FALSE") {
+			}
+			else if (v[i].m_cmd == "POP_JUMP_IF_TRUE" || v[i].m_cmd == "POP_JUMP_IF_FALSE") {
+				// 基本 if 指令
 				if (v[i].m_cmd == "POP_JUMP_IF_TRUE") {
 					obj_expr_t _expr2;
-					_expr2.xchg (_expr);
+					_expr2.swap (_expr);
 					_expr.m_operator = "!";
 					_expr.m_vOper2.push_back (_expr2);
 				}
 				obj_if_t _if;
-				_if.push_back (std::make_pair<obj_value_t, std::vector<obj_stat_t>> (std::move (_expr.m_vOper2[0]), std::vector<obj_stat_t> ()));
-				_expr.m_vOper2.erase (_expr.m_vOper2.begin ());
-				size_t j = i + 1, k = 0;
-				Disasmer _child_bc;
+				std::vector<DisasmItem> vchild;
 				size_t sz_end = v[i].m_val;
-				for (; j < v.size () && v[j].m_offset < sz_end; j += k) {
-					k = _child_bc.parse_item (v, j);
-					if (!k) { RETURN_ERROR (""); }
+				size_t j = i + 1;
+				for (; v.size () > j && v[j].m_offset < sz_end;) {
+					vchild.push_back (v[j]);
+					v.erase (v.begin () + j);
 				}
-				std::vector<obj_item_t> child_items = std::get<0> (_child_bc.m_items);
-				for (obj_item_t &child_item : child_items) {
-					if (child_item.index () == 0) { _if.rbegin ()->second.push_back (std::get<0> (child_item)); }
-					else { RETURN_ERROR ("暂不支持if语句嵌套类或函数"); }
+				size_t sz_else = 0;
+				if (vchild.rbegin ()->m_cmd == "JUMP_FORWARD") {
+					sz_else = atoi (&(std::get<1> (vchild.rbegin ()->m_val2))[2]);
+					vchild.pop_back ();
+				}
+				Disasmer _child;
+				if (!_child.parse_items (vchild))
+					return 0;
+				_if.push_back (std::make_pair<obj_value_t, std::vector<obj_stat_t>> (std::move (*_expr.m_vOper2.rbegin ()), std::vector<obj_stat_t> ()));
+				_expr.m_vOper2.erase (_expr.m_vOper2.end () - 1);
+				_child.m_items.addto_vstat (_if.rbegin ()->second);
+				if (sz_else) {
+					vchild.clear ();
+					for (j = i + 1; v.size () > j && v[j].m_offset < sz_else;) {
+						vchild.push_back (v[j]);
+						v.erase (v.begin () + j);
+					}
+					std::get<0> (_child.m_items).clear ();
+					if (!_child.parse_items (vchild))
+						return 0;
+					_if.push_back (std::make_pair<obj_value_t, std::vector<obj_stat_t>> (nullptr, std::vector<obj_stat_t> ()));
+					_child.m_items.addto_vstat (_if.rbegin ()->second);
 				}
 				m_v.push_back (obj_stat_t (_if));
-				return j - index;
-			} else if (v[i].m_cmd == "SETUP_LOOP") {
-				// 循环创建指令
-				// 这儿只考虑 for 循环
+				return i - index + 1;
+			}
+			else if (v[i].m_cmd == "DUP_TOP") {
+				// 复制栈顶元素指令，这儿只考虑复合 if 指令
+				if (_expr.m_vOper2.size () != 2)						{ RETURN_ERROR ("复合 if 指令创建时数据栈元素个数必须为 2 个"); }
+				obj_expr_t _exprX;
+				_exprX.m_operator = "&&";
+				while (v[i].m_cmd == "DUP_TOP") {
+					if (v.size () <= i + 9)								{ RETURN_ERROR ("复合 if 指令1后跟指令不可少于 9 个"); }
+					else if (v[i + 1].m_cmd != "ROT_THREE")				{ RETURN_ERROR ("复合 if 指令1后跟第 1 个指令不为 ROT_THREE"); }
+					else if (v[i + 2].m_cmd != "COMPARE_OP")			{ RETURN_ERROR ("复合 if 指令1后跟第 2 个指令不为 COMPARE_OP"); }
+					else if (v[i + 3].m_cmd != "JUMP_IF_FALSE_OR_POP")	{ RETURN_ERROR ("复合 if 指令1后跟第 3 个指令不为 JUMP_IF_FALSE_OR_POP"); }
+					else if (v[i + 4].m_cmd != "LOAD_CONST")			{ RETURN_ERROR ("复合 if 指令1后跟第 4 个指令不为 LOAD_CONST"); }
+					//
+					obj_expr_t _expr2;
+					_expr2.m_vOper1.push_back (*(_expr.m_vOper2.rbegin () + 1));
+					_expr2.m_operator = std::get<1> (v[i + 2].m_val2);
+					_expr2.m_vOper2.push_back (*_expr.m_vOper2.rbegin ());
+					_expr.m_vOper2.erase (_expr.m_vOper2.begin ());
+					_exprX.m_vOper2.push_back (_expr2);
+					//
+					if (v[i + 4].m_val2.index () == 1)
+						_expr.m_vOper2.push_back (std::get<1> (v[i + 4].m_val2));
+					else if (v[i + 4].m_val2.index () == 2)
+						_expr.m_vOper2.push_back (std::get<2> (v[i + 4].m_val2));
+					else if (v[i + 4].m_val2.index () == 3)
+						_expr.m_vOper2.push_back (std::get<3> (v[i + 4].m_val2));
+					i += 5;
+				}
+				if (v.size () <= i + 3)									{ RETURN_ERROR ("复合 if 指令2后跟指令不可少于 5 个"); }
+				else if (v[i].m_cmd != "COMPARE_OP")					{ RETURN_ERROR ("复合 if 指令2后跟第 1 个指令不为 COMPARE_OP"); }
+				else if (v[i + 1].m_cmd != "JUMP_FORWARD")				{ RETURN_ERROR ("复合 if 指令2后跟第 2 个指令不为 JUMP_FORWARD"); }
+				else if (v[i + 2].m_cmd != "ROT_TWO")					{ RETURN_ERROR ("复合 if 指令2后跟第 3 个指令不为 ROT_TWO"); }
+				else if (v[i + 3].m_cmd != "POP_TOP")					{ RETURN_ERROR ("复合 if 指令2后跟第 4 个指令不为 POP_TOP"); }
+				//
+				obj_expr_t _expr2;
+				_expr2.m_vOper1.push_back (*(_expr.m_vOper2.rbegin () + 1));
+				_expr2.m_operator = std::get<1> (v[i].m_val2);
+				_expr2.m_vOper2.push_back (*_expr.m_vOper2.rbegin ());
+				_exprX.m_vOper2.push_back (_expr2);
+				_expr.m_vOper2.clear ();
+				_expr.m_vOper2.push_back (_exprX);
+				// 后面交给if指令执行
+				i += 3;
+			}
+			else if (v[i].m_cmd == "SETUP_LOOP") {
+				// 循环创建指令，这儿只考虑 for 循环
 				if (_expr.m_vOper1.size () || _expr.m_vOper2.size ())	{ RETURN_ERROR ("循环创建时数据栈不可有待处理数据"); }
 				else if (v.size () <= i + 9)							{ RETURN_ERROR ("循环创建指令后跟指令不可少于 7 个"); }
 				else if (v[i + 1].m_cmd != "LOAD_NAME")					{ RETURN_ERROR ("循环创建指令后跟第 1 个指令不为 LOAD_NAME"); }
@@ -199,13 +275,14 @@ struct Disasmer {
 				std::vector<obj_item_t> child_items = std::get<0> (_child_bc.m_items);
 				for (obj_item_t &child_item : child_items) {
 					if (child_item.index () == 0) { _for.m_vStat.push_back (std::get<0> (child_item)); }
-					else { RETURN_ERROR ("暂不支持if语句嵌套类或函数"); }
+					else { RETURN_ERROR ("暂不支持for语句嵌套类或函数"); }
 				}
 				m_v.push_back (obj_stat_t (_for));
 				if		(v[j].m_cmd != "JUMP_ABSOLUTE")					{ RETURN_ERROR ("循环创建倒数第 2 个指令不为 JUMP_ABSOLUTE"); }
 				else if	(v[j + 1].m_cmd != "POP_BLOCK")					{ RETURN_ERROR ("循环创建倒数第 1 个指令不为 POP_BLOCK"); }
 				return j - index + 2;
-			} else {
+			}
+			else {
 				RETURN_ERROR ("暂不支持的指令: " + v[i].m_cmd);
 			}
 		}
@@ -227,6 +304,11 @@ struct Disasmer {
 	std::string translate_code () {
 		auto padding = [](size_t padding) { std::string s = ""; while (padding-- > 0) s += "    "; return s; };
 		std::string s = "#include <iostream>\n#include <string>\n\n";
+			//"std::string operator* (std::string s, int n) {\n"
+			//"    std::string ret;\n"
+			//"    while (n-- > 0) ret += s;\n"
+			//"    return ret;\n"
+			//"}\n\n";
 		s += m_items.to_str (0);
 		size_t p = s.find ("if (__name__ == \"__main__\") {");
 		if (p != std::string::npos && s[p - 1] == '\n') {

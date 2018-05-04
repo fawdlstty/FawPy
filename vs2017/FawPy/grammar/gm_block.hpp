@@ -31,7 +31,7 @@ struct obj_func_t {
 		}
 		s += ") {\n";
 		for (obj_stat_t &stat : m_vStat)
-			s += stat.to_str (pt, padding + 1, str_self);
+			s += stat.to_str (pt, ParseType::VarRegionInFunction, padding + 1, str_self);
 		s += hStringA::format ("%s}\n\n", hStringA::get_padding (padding).c_str ());
 		pt.clear_var ();
 		return s;
@@ -46,7 +46,7 @@ struct obj_class_t {
 	std::string to_str (ParseTypes &pt, size_t padding) {
 		std::string s = hStringA::format ("%sstruct %s {\n", hStringA::get_padding (padding).c_str (), m_name.c_str ());
 		for (obj_stat_t &stat : m_vStat)
-			s += stat.to_str (pt, padding + 1, "");
+			s += stat.to_str (pt, ParseType::VarRegionClass, padding + 1, "");
 		for (obj_func_t &func : m_vFunc)
 			s += func.to_str (pt, padding + 1, true);
 		if (m_vFunc.size () > 0)

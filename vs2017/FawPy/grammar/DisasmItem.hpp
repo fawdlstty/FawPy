@@ -39,7 +39,7 @@ struct DisasmItem {
 						m_val2 = atof (&s[33]);
 					else
 						m_val2 = atoi (&s[33]);
-				} else if (ch == '<') {
+				} else if (ch == '<' && s.length () > 40) {
 					m_val2 = std::vector<DisasmItem> ();
 				} else {
 					m_val2 = &s[33];

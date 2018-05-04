@@ -13,10 +13,42 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="头文件\grammar">
+      <UniqueIdentifier>{da79aac3-1e96-4453-b5a4-e32c98ff907e}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="grammar\gm_item.hpp">
+      <Filter>头文件\grammar</Filter>
+    </ClInclude>
+    <ClInclude Include="grammar\gm_struct.hpp">
+      <Filter>头文件\grammar</Filter>
+    </ClInclude>
+    <ClInclude Include="grammar\hstring.hpp">
+      <Filter>头文件\grammar</Filter>
+    </ClInclude>
+    <ClInclude Include="grammar\ParseTypes.hpp">
+      <Filter>头文件\grammar</Filter>
+    </ClInclude>
+    <ClInclude Include="grammar\Disasmer.hpp">
+      <Filter>头文件\grammar</Filter>
+    </ClInclude>
+    <ClInclude Include="grammar\DisasmItem.hpp">
+      <Filter>头文件\grammar</Filter>
+    </ClInclude>
+    <ClInclude Include="grammar\fawpy.hpp">
+      <Filter>头文件\grammar</Filter>
+    </ClInclude>
+    <ClInclude Include="grammar\gm_block.hpp">
+      <Filter>头文件\grammar</Filter>
+    </ClInclude>
+    <ClInclude Include="grammar\gm_expr.hpp">
+      <Filter>头文件\grammar</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

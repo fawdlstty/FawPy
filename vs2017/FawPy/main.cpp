@@ -9,7 +9,7 @@
 
 int main (int argc, char* argv[]) {
 	// ¶ÁÈ¡ÎÄ¼ş
-	std::ifstream ifs ("D:/GitHub/FawPy/disasm1.txt");
+	std::ifstream ifs ("D:/GitHub/FawPy/disasm3.txt");
 	std::string s ((std::istreambuf_iterator<char> (ifs)), std::istreambuf_iterator<char> ());
 	std::vector<DisasmItem> v = DisasmItem::parse (s);
 
@@ -21,9 +21,8 @@ int main (int argc, char* argv[]) {
 	} else {
 		v.erase (v.end () - 2, v.end ());
 		Disasmer parser;
-		parser.parse_items (v);
-		s = parser.translate_code ();
-		std::cout << s << std::endl;
+		if (parser.parse_items (v))
+			std::cout << parser.translate_code () << std::endl;
 	}
 	system ("pause");
 	return 0;

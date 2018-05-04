@@ -126,6 +126,17 @@
   <ItemGroup>
     <ClCompile Include="main.cpp" />
   </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="grammar\Disasmer.hpp" />
+    <ClInclude Include="grammar\DisasmItem.hpp" />
+    <ClInclude Include="grammar\fawpy.hpp" />
+    <ClInclude Include="grammar\gm_block.hpp" />
+    <ClInclude Include="grammar\gm_expr.hpp" />
+    <ClInclude Include="grammar\gm_item.hpp" />
+    <ClInclude Include="grammar\gm_struct.hpp" />
+    <ClInclude Include="grammar\hstring.hpp" />
+    <ClInclude Include="grammar\ParseTypes.hpp" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

@@ -20,8 +20,8 @@ struct obj_expr_t {
 	std::vector<obj_value_t>	m_vOper2;
 	void init () { m_vOper1.clear (); m_operator.clear (); m_vOper2.clear (); }
 	bool empty () { return (!(m_vOper1.size () || m_vOper2.size ())); }
-	void xchg (obj_expr_t &o) { m_operator.swap (o.m_operator); m_vOper1.swap (o.m_vOper1); m_vOper2.swap (o.m_vOper2); }
-	std::string to_str (ParseTypes &pt, std::string str_self);
+	void swap (obj_expr_t &o) { m_operator.swap (o.m_operator); m_vOper1.swap (o.m_vOper1); m_vOper2.swap (o.m_vOper2); }
+	std::string to_str (ParseTypes &pt, ParseType::VarRegionEnum region, std::string str_self);
 };
 
 // 值结构
@@ -31,12 +31,12 @@ struct obj_value_t : public std::variant<obj_expr_t, std::string, double, int, n
 	obj_value_t (double o)		: std::variant<obj_expr_t, std::string, double, int, nullptr_t> (o) {}
 	obj_value_t (int o)			: std::variant<obj_expr_t, std::string, double, int, nullptr_t> (o) {}
 	obj_value_t (nullptr_t o)	: std::variant<obj_expr_t, std::string, double, int, nullptr_t> (o) {}
-	std::string to_str (ParseTypes &pt, std::string str_self) {
+	std::string to_str (ParseTypes &pt, ParseType::VarRegionEnum region, std::string str_self) {
 		if (index () == 0) {
 			obj_expr_t &_expr = std::get<0> (*this);
 			if (_expr.m_operator == "call" || _expr.m_operator == "->")
-				return _expr.to_str (pt, str_self);
-			return hStringA::format ("(%s)", _expr.to_str (pt, str_self).c_str ());
+				return _expr.to_str (pt, region, str_self);
+			return hStringA::format ("(%s)", _expr.to_str (pt, region, str_self).c_str ());
 		} else if (index () == 1) {
 			std::string s = std::get<1> (*this);
 			if (s == str_self)
@@ -53,7 +53,7 @@ struct obj_value_t : public std::variant<obj_expr_t, std::string, double, int, n
 	}
 };
 
-std::string obj_expr_t::to_str (ParseTypes &pt, std::string str_self) {
+std::string obj_expr_t::to_str (ParseTypes &pt, ParseType::VarRegionEnum region, std::string str_self) {
 	std::string s;
 	// 特殊情况1：print 转 std::cout
 	if (m_operator == "call" && m_vOper1.size () == 1 && m_vOper1[0].index () == 1 && std::get<1> (m_vOper1[0]) == "print") {
@@ -61,25 +61,35 @@ std::string obj_expr_t::to_str (ParseTypes &pt, std::string str_self) {
 		for (auto iter = m_vOper2.begin (); iter != m_vOper2.end (); ++iter) {
 			if (iter != m_vOper2.begin ())
 				s += "' ' << ";
-			s += iter->to_str (pt, str_self);
+			s += iter->to_str (pt, region, str_self);
 			s += " << ";
 		}
 		s += "std::endl";
 		return s;
 	}
-	// 特殊情况2：赋值时先确定是否有这个变量
+	// 特殊情况2：&&连接符
+	if (m_operator == "&&") {
+		for (obj_value_t &value : m_vOper2) {
+			if (!s.empty ())
+				s += " && ";
+			s += value.to_str (pt, region, str_self);
+		}
+		return s;
+	}
+	// 特殊情况3：赋值时先确定是否有这个变量
 	if (m_operator == "=" && m_vOper1.size () == 1 && m_vOper1[0].index () == 1) {
-		std::string varName = std::get<1> (m_vOper1[0]);
+		std::string var_name = std::get<1> (m_vOper1[0]);
 		// 没有这个变量
-		if (pt.get_var (varName) == pt.end ()) {
+		if (std::get<1> (pt.get_var (var_name)) == ParseType::VarTypeNone) {
 			s = "auto ";
+			pt.add_var (region, ParseType::VarTypeAny, "", var_name);
 		}
 	}
 
 	if (m_vOper1.size () > 1) s += "(";
 	for (size_t i = 0; i < m_vOper1.size (); ++i) {
 		if (i > 0) s += ", ";
-		s += m_vOper1[i].to_str (pt, str_self);
+		s += m_vOper1[i].to_str (pt, region, str_self);
 	}
 	if (m_vOper1.size () > 1) s += ")";
 	//
@@ -101,7 +111,7 @@ std::string obj_expr_t::to_str (ParseTypes &pt, std::string str_self) {
 	if (m_vOper2.size () > 1 || m_operator == "call") s += "(";
 	for (size_t i = 0; i < m_vOper2.size (); ++i) {
 		if (i > 0) s += ", ";
-		s += m_vOper2[i].to_str (pt, str_self);
+		s += m_vOper2[i].to_str (pt, region, str_self);
 	}
 	if (m_vOper2.size () > 1 || m_operator == "call") s += ")";
 	return s;
