@@ -65,10 +65,12 @@ int main (int argc, char* argv[]) {
 }
 ```
 
-项目引用了cinatra项目，链接为<a href="https://github.com/qicosmos/cinatra" target="_blank">https://github.com/qicosmos/cinatra</a>
-
 经测试，生成的代码编译成功。目前这个项目是测试版，翻译的不够完美，能翻译的结构有限，问题也较多，也有明确的弱点，比如生成器，截止C艹17还没有这玩意，所以从实现上就比较蛋疼了；另外还有模块的`__name=='__main__'`，etc...
 
 各位大佬如果有什么好的建议及遇到什么问题欢迎提issue，同时也欢迎对这个项目感兴趣的大佬参与进来一起开发。
+
+项目引用的第三方库：
+* <a href="https://github.com/boostorg/boost" target="_blank">boost</a>
+* <a href="https://github.com/qicosmos/cinatra" target="_blank">cinatra</a>
 
 个人博客地址：<a href="https://www.fawdlstty.com" target="_blank">https://www.fawdlstty.com</a>，欢迎到访。
