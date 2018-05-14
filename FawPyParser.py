@@ -54,23 +54,25 @@ class AST_Value ():
 			else:
 				self.val = _val
 
-	## 获取值类型
-	#def get_value_type (self):
-	#	if self.type == '_ast.Num':
-	#		return 'int'
-	#	elif self.type == '_ast.Str':
-	#		return 'std::string'
-	#	elif self.type == '_ast.Tuple':
-	#		vals = self.val.elts
-	#		ret = 'std::tuple<'
-	#		for i in vals:
-	#			if (i > 0):
-	#				ret += ', '
-	#			ret += AST_Value (i).get_value_type ()
-	#		ret += '>'
-	#		return ret
-	#	else:
-	#		return self.type
+	# 获取值类型
+	def get_type (self):
+		if self.type == '_ast.Num':
+			return 'int'
+		elif self.type == '_ast.Str':
+			return 'std::string'
+		elif self.type == '_ast.NameConstant':
+			return None
+		elif self.type == '_ast.Tuple':
+			vals = self.val.elts
+			ret = 'std::tuple<'
+			for i in vals:
+				if (i > 0):
+					ret += ', '
+				ret += AST_Value (i).get_type ()
+			ret += '>'
+			return ret
+		else:
+			return self.type
 
 	# 导出
 	def export (self, _this, _is_left = False, _no_quot = False):
@@ -199,12 +201,35 @@ class AST_Expr ():
 		elif self.oper == 'return':
 			return 'return ' + self.val.export (_this)
 		elif self.oper == 'call':
-			_ret = self.func.export (_this, False, True) + ' ('
-			_first = True
-			for i in range (0, len (self.params)):
-				_ret += [', ', ''][i == 0]
-				_ret += self.params[i].export (_this)
-			return _ret + ')'
+			_func = self.func.export (_this, False, True)
+			_ret = ''
+			if (_func == 'print'):
+				if 'file' in self.pairs.keys () and self.pairs['file'] !=  'sys.stdout':
+					_ret += self.pairs['file'].export (_this)
+				else:
+					_ret += 'std::cout'
+				_join = '" "' if not 'sep' in self.pairs.keys () else self.pairs['sep'].export (_this)
+				for i in range (0, len (self.params)):
+					_ret += [' << ' + _join, ''][i == 0 or _join == '']
+					_ret += ' << ' + self.params[i].export (_this)
+				_ret += ' << ' + ('std::endl' if not 'end' in self.pairs.keys () else self.pairs['end'].export (_this))
+				# 以下代码含义为，考虑转义字符后的 _ret = _ret.replace ('" << "', '')
+				_start = 0
+				_p = _ret.find ('" << "', _start)
+				_transmean_counter = lambda s: 0 if s[-1:] != '\\' else 1 + _transmean_counter (s[:-1])
+				while _p != -1:
+					_left_tmp = _ret[:_p]
+					if _transmean_counter (_left_tmp) % 2 == 0:
+						_ret = _left_tmp + _ret[_p + 6:]
+					_p = _ret.find ('" << "', _start)
+			else:
+				_ret += _func + ' ('
+				_first = True
+				for i in range (0, len (self.params)):
+					_ret += [', ', ''][i == 0]
+					_ret += self.params[i].export (_this)
+				_ret += ')'
+			return _ret
 		elif self.oper == '->':
 			return self.val_left.export (_this) + '.' + self.val_right.export (_this)
 		else:
