@@ -121,11 +121,11 @@ class AST_Expr ():
 	# 定义可接受的类型
 	@staticmethod
 	def accept (_type):
-		return _type == '_ast.Assign' or _type == '_ast.Return' or _type == '_ast.BinOp' or _type == '_ast.Compare' or _type == '_ast.Expr' or _type == '_ast.Call' or _type == '_ast.Attribute' or _type == '_ast.BoolOp'
+		return _type == '_ast.Assign' or _type == '_ast.Return' or _type == '_ast.BinOp' or _type == '_ast.Compare' or _type == '_ast.Expr' or _type == '_ast.Call' or _type == '_ast.Attribute' or _type == '_ast.BoolOp' or _type == '_ast.UnaryOp'
 
 	# 获取操作符类型的操作符
-	__get_type_oper = lambda self, _type: ['+', '-', '*', '/', '==', '<', '<=', '>', '>=', '&&', '||'][[
-		'_ast.Add', '_ast.Sub', '_ast.Mult', '_ast.Div', '_ast.Eq', '_ast.Lt', '_ast.LtE', '_ast.Gt', '_ast.GtE', '_ast.And', '_ast.Or'].index (_type)]
+	__get_type_oper = lambda self, _type: ['+', '-', '*', '/', '==', '<', '<=', '>', '>=', '&&', '||', '!'][[
+		'_ast.Add', '_ast.Sub', '_ast.Mult', '_ast.Div', '_ast.Eq', '_ast.Lt', '_ast.LtE', '_ast.Gt', '_ast.GtE', '_ast.And', '_ast.Or', '_ast.Not'].index (_type)]
 
 	# 构造函数
 	def __init__ (self, _val, _type, *_args):
@@ -161,6 +161,14 @@ class AST_Expr ():
 		elif _type == '_ast.Expr':
 			self.oper = 'transfer'
 			self.val = AST_Expr (_val.value, base_type (_val.value))
+		elif _type == '_ast.BoolOp':
+			self.oper = self.__get_type_oper (base_type (_val.op))
+			self.vals = []
+			for _val in _val.values:
+				self.vals.append (AST_Value (_val))
+		elif _type == '_ast.UnaryOp':
+			self.oper = self.__get_type_oper (base_type (_val.op))
+			self.val = AST_Value (_val.operand)
 		elif _type == '_ast.Call':
 			self.oper = 'call'
 			self.func = AST_Value (_val.func)
@@ -174,11 +182,6 @@ class AST_Expr ():
 			self.oper = '->'
 			self.val_left = AST_Value (_val.value)
 			self.val_right = AST_Value (_val.attr)
-		elif _type == '_ast.BoolOp':
-			self.oper = self.__get_type_oper (base_type (_val.op))
-			self.vals = []
-			for _val in _val.values:
-				self.vals.append (AST_Value (_val))
 		else:
 			print ('[AST_Expr] parse error: unprocessed type', _type)
 
@@ -191,6 +194,8 @@ class AST_Expr ():
 			for i in range (1, len (self.vals)):
 				_ret += ' ' + self.oper + ' ' + self.vals[i].export (_this)
 			return _ret
+		elif self.oper in ['!']:
+			return self.oper + self.val.export (_this)
 		elif self.oper == 'return':
 			return 'return ' + self.val.export (_this)
 		elif self.oper == 'call':
